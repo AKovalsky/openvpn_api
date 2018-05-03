@@ -17,4 +17,4 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class CertificateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Certificate
-        fields = ('url', 'certificate', 'key', 'created_at', 'updated_at')
+        fields = ('url', 'certificate', 'key', 'csr', 'created_at', 'updated_at')
