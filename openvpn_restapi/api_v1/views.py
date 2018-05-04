@@ -2,10 +2,12 @@ from openvpn_restapi.api_v1.models import User, Group, Certificate
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import mixins
-from .custom_mixins import CreateCertificateModelMixin
+from .custom_mixins import CreateCertificateModelMixin, RevokeCertificateModelMixin, RetrieveCertificateModelMixin
 from openvpn_restapi.api_v1.serializers import UserSerializer, GroupSerializer, CertificateSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -15,6 +17,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAdminUser,)
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('username', 'email')
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -27,9 +31,10 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class CertificateViewSet(CreateCertificateModelMixin,
-                         mixins.UpdateModelMixin,
+                         RevokeCertificateModelMixin,
+                         RetrieveCertificateModelMixin,
+    #                     mixins.UpdateModelMixin,
                          mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet
                         ):
@@ -39,3 +44,5 @@ class CertificateViewSet(CreateCertificateModelMixin,
     queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
     permission_classes = (permissions.IsAdminUser,)
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('basename', 'user')

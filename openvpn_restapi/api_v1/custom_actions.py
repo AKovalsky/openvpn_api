@@ -7,18 +7,50 @@ import socket
 from django.utils.crypto import get_random_string
 from OpenSSL import crypto, SSL
 from django.conf import settings
-
+from .custom_exceptions import CreateSSLCertificateException, ReadSSLCertificateException
 
 def CreateSSLCertificate(name):
     clientkeyname = name + '.key'
     clientcertname = name + '.crt'
     clientcsrname = name + '.csr'
-    serial = 0x0C
+    serial = int.from_bytes(os.urandom(16), byteorder='big')
     ca_key_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key'
     ca_cert_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt'
     user_certificates_path = '/usr/local/client_certificates/'
-    create_certificate(ca_cert_path, ca_key_path, name, clientcsrname, clientcertname, clientkeyname, serial, user_certificates_path)
- 
+    try:
+        create_certificate(ca_cert_path, ca_key_path, name, clientcsrname, clientcertname, clientkeyname, serial, user_certificates_path)
+    except:
+        raise CreateSSLCertificateException
+    return clientcertname, clientkeyname, clientcsrname, serial
+
+
+
+def RevokeSSLCertificate(basename, certificate_name):
+    ca_key_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key'
+    ca_cert_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt'
+    certificate_path = '/usr/local/client_certificates/' + basename + '/' + certificate_name
+    clr_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/clr.pem'
+    revoke_certificate(ca_cert_path, ca_key_path, clr_path, certificate_path)
+    print(name)
+
+def CreateConfigFile(commons, basename, ca, certificate, key):
+    common = read_from_disk('/root', 'commons.txt')
+    cacertdump = read_from_disk('/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys','ca.crt')
+    clientcert = read_from_disk('/usr/local/client_certificates/' + basename, certificate)
+    clientkey = read_from_disk('/usr/local/client_certificates/' + basename, key)
+    ovpn = "%s<ca>\n%s</ca>\n<cert>\n%s</cert>\n<key>\n%s</key>\n" % (common, cacertdump, clientcert, clientkey)
+    write_to_disk('/usr/local/client_certificates/' + basename, basename + '.ovpn', ovpn)
+    return basename + '.ovpn'
+
+def read_from_disk(directory, filename):
+    file_path = directory + '/' + filename
+    try:
+        with open(file_path, 'rb') as f:
+            content = f.read().decode('utf-8')
+    except IOError:
+        raise ReadSSLCertificateException 
+    return content
+
 
 def write_to_disk(directory, filename, content):
     try:
@@ -28,9 +60,9 @@ def write_to_disk(directory, filename, content):
             raise CreateSSLCertificateException
     try:
         # Write our file.
-        f = open(directory+'/'+filename, 'w')
-        f.write(content)
-        f.close()
+        with open(directory+'/'+filename, 'w') as f:
+            f.write(content)
+            f.close()
     except:
         raise CreateSSLCertificateException
 
@@ -182,6 +214,30 @@ def create_certificate(ca_cert, ca_key, name, clientcsrname, clientcertname, cli
     write_to_disk(filepath+name, clientcsrname, clientcsr)
     write_to_disk(filepath+name, clientcertname, clientcert)
     
+def revoke_certificate(ca_cert_path, ca_key_path, clr_path, cert_path):
+    # load files
+    try:
+        with open(ca_cert_path) as ca_file:
+            ca = crypto.load_certificate(crypto.FILETYPE_PEM, ca_file.read())
+        with open(ca_key_ath) as ca_key_file:
+            ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key_file.read())
+    except IOError as e:
+        log.error(e)
+        raise
+
+    with open(clr_path, 'r') as f:
+        crl = crypto.load_crl(crypto.FILETYPE_PEM, f.read())
+
+    x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
+    revoked = crypto.Revoked()
+    revoked.set_serial((hex(x509.get_serial_number())[2:]))
+    crl.add_revoked(revoked)
+    crl_text = crl.export(ca, ca_key)
+
+    with open(clr_path, 'a') as f:
+        f.write(crl_text)
+
+
 
 
 if __name__ == "__main__":

@@ -33,6 +33,9 @@ GLOBAL_SETTINGS = {
     'USER_CERT_DIR': '/usr/local/src/client_certificates/',
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+}
 
 # Application definition
 
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'openvpn_restapi.api_v1',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
