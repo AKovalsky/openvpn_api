@@ -3,13 +3,13 @@
 import os
 import coreapi
 
-username = os.environ['username']
-password = os.environ['password']
-common_name = os.environ['common_name']
+#username = os.environ['username']
+#password = os.environ['password']
+#common_name = os.environ['common_name']
 
-#username = 'PMSgzkrBQwO8'
-#password = '1aqwCh4oLUgf'
-#common_name = 'HMuiYhNw1rct639E'
+username = 'PMSgzkrBQwO8'
+password = '1aqwCh4oLUgf'
+common_name = 'HMuiYhNw1rct639E'
 
 client = coreapi.Client()
 
@@ -44,7 +44,8 @@ test = None
 while test is None:
     try:
         certificate_params = {'user': user_id, 'basename': common_name}
-        certificate = client.action(schema, ["certificates", "list"], certificate_params)   
+        certificate = client.action(schema, ["certificates", "list"], certificate_params)  
+        print(certificate)
         test = 'ok'
     except:
         pass

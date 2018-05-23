@@ -13,10 +13,10 @@ def CreateSSLCertificate(name):
     clientkeyname = name + '.key'
     clientcertname = name + '.crt'
     clientcsrname = name + '.csr'
-    serial = int.from_bytes(os.urandom(16), byteorder='big')
-    ca_key_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key'
-    ca_cert_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt'
-    user_certificates_path = '/usr/local/client_certificates/'
+    ca_key_path = settings.CA_KEY_PATH
+    ca_cert_path = settings.CA_CERT_PATH
+    user_certificates_path = settings.USER_CERT_DIR
+    serial = int.from_bytes(os.urandom(16), byteorder='big')    
     try:
         create_certificate(ca_cert_path, ca_key_path, name, clientcsrname, clientcertname, clientkeyname, serial, user_certificates_path)
     except:
@@ -26,24 +26,25 @@ def CreateSSLCertificate(name):
 
 
 def RevokeSSLCertificate(basename, certificate_name):
-    ca_key_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key'
-    ca_cert_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt'
-    certificate_path = '/usr/local/client_certificates/' + basename + '/' + certificate_name
+    ca_key_path = settings.CA_KEY_PATH
+    ca_cert_path = settings.CA_CERT_PATH
+    certificate_path = settings.USER_CERT_DIR + basename + '/' + certificate_name
     clr_path = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/clr.pem'
     revoke_certificate(ca_cert_path, ca_key_path, clr_path, certificate_path)
     print(name)
 
 def CreateConfigFile(commons, basename, ca, certificate, key):
-    common = read_from_disk('/root', 'commons.txt')
-    cacertdump = read_from_disk('/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys','ca.crt')
-    clientcert = read_from_disk('/usr/local/client_certificates/' + basename, certificate)
-    clientkey = read_from_disk('/usr/local/client_certificates/' + basename, key)
+    common = read_from_disk('/root/commons.txt')
+    cacertdump = read_from_disk(settings.CA_CERT_PATH)
+    clientcert = read_from_disk(settings.USER_CERT_DIR + basename + '/' + certificate)
+    clientkey = read_from_disk(settings.USER_CERT_DIR + basename + '/' + key)
     ovpn = "%s<ca>\n%s</ca>\n<cert>\n%s</cert>\n<key>\n%s</key>\n" % (common, cacertdump, clientcert, clientkey)
-    write_to_disk('/usr/local/client_certificates/' + basename, basename + '.ovpn', ovpn)
+    write_to_disk(settings.USER_CERT_DIR + basename, basename + '.ovpn', ovpn)
     return basename + '.ovpn'
+    return 'test'
 
-def read_from_disk(directory, filename):
-    file_path = directory + '/' + filename
+def read_from_disk(path):
+    file_path = path
     try:
         with open(file_path, 'rb') as f:
             content = f.read().decode('utf-8')

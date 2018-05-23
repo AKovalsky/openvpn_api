@@ -25,13 +25,12 @@ SECRET_KEY = 'b69gde#_!o=m5iqyy&$mbuogdybg#0fmle-$@t&xn$*44l99r5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.37.77.151', 'covalschi.work']
+ALLOWED_HOSTS = ['localhost', 'covalschi.work']
 
-GLOBAL_SETTINGS = {
-    'CA_CERT_PATH': '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt',
-    'CA_KEY_PATH': '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key',
-    'USER_CERT_DIR': '/usr/local/src/client_certificates/',
-}
+
+CA_KEY_PATH = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.key'
+CA_CERT_PATH = '/usr/local/src/easy-rsa-old/easy-rsa/2.0/keys/ca.crt'
+USER_CERT_DIR = '/usr/local/client_certificates/'
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)

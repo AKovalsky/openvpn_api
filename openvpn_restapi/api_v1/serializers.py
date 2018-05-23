@@ -2,19 +2,19 @@ from openvpn_restapi.api_v1.models import User, Group, Certificate
 from rest_framework import serializers
 from .custom_actions import CreateConfigFile
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'url', 'username', 'email', 'group', 'password', 'online', 'enabled', 'start_date', 'end_date', 'created_at', 'updated_at')
+        fields = ('id', 'url', 'username', 'discord_username', 'email', 'group', 'password', 'online', 'enabled', 'start_date', 'end_date', 'created_at', 'updated_at')
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'url', 'name', 'created_at', 'updated_at')
 
 
-class CertificateSerializer(serializers.HyperlinkedModelSerializer):
+class CertificateSerializer(serializers.ModelSerializer):
     config = serializers.SerializerMethodField()
 
     class Meta:

@@ -18,7 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAdminUser,)
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('username', 'email')
+    filter_fields = ('username', 'email', 'discord_username')
 
 
 class GroupViewSet(viewsets.ModelViewSet):
